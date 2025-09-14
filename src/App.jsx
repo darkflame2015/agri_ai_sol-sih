@@ -6,6 +6,7 @@ function App() {
   const [longitude, setLongitude] = useState("");
   const [image, setImage] = useState(null);
   const [error, setError] = useState(null);
+  const [locating, setLocating] = useState(false);
 
   const getNDVI = async () => {
     setError(null);
@@ -27,6 +28,32 @@ function App() {
     }
   };
 
+  const handleUseMyLocation = () => {
+    if (!("geolocation" in navigator)) {
+      setError("Geolocation is not supported by your browser.");
+      return;
+    }
+    setError(null);
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude: lat, longitude: lon } = pos.coords;
+        setLatitude(lat.toFixed(6));
+        setLongitude(lon.toFixed(6));
+        setLocating(false);
+      },
+      (err) => {
+        let msg = "Unable to retrieve your location.";
+        if (err.code === 1) msg = "Permission denied. Please allow location access.";
+        else if (err.code === 2) msg = "Position unavailable. Try again.";
+        else if (err.code === 3) msg = "Location request timed out.";
+        setError(msg);
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
+
   return (
     <div className="app">
       <h1>Crop NDVI Viewer (React)</h1>
@@ -43,6 +70,9 @@ function App() {
           value={longitude}
           onChange={(e) => setLongitude(e.target.value)}
         />
+        <button onClick={handleUseMyLocation} disabled={locating}>
+          {locating ? "Locating..." : "Use My Location"}
+        </button>
         <button onClick={getNDVI}>Get NDVI</button>
       </div>
 

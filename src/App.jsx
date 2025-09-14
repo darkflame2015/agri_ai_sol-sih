@@ -1,72 +1,53 @@
 import { useState } from "react";
-import axios from "axios";
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
+import "./index.css";
 
 function App() {
-  const [lat, setLat] = useState("");
-  const [lon, setLon] = useState("");
-  const [mode, setMode] = useState("NDVI");
-  const [data, setData] = useState(null);
-  const [error, setError] = useState("");
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
+  const [image, setImage] = useState(null);
+  const [error, setError] = useState(null);
 
-  const fetchIndex = async () => {
+  const getNDVI = async () => {
+    setError(null);
+    setImage(null);
     try {
-      setError("");
-      const res = await axios.post("http://127.0.0.1:5000/api/get-index", {
-        lat: parseFloat(lat),
-        lon: parseFloat(lon),
-        mode,
+      const res = await fetch("http://127.0.0.1:5000/api/ndvi", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ latitude, longitude }),
       });
-      const raw = res.data.values;
-
-      // convert 2D array -> chart points
-      const points = raw.map((row, i) => ({ x: i, y: row[0] }));
-      setData(points);
+      const data = await res.json();
+      if (data.error) {
+        setError(data.error);
+      } else {
+        setImage("data:image/png;base64," + data.image);
+      }
     } catch (err) {
-      setError(err.response?.data?.error || "Request failed");
+      setError("Request failed: " + err.message);
     }
   };
 
   return (
-    <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
-      <h2>Sentinel Spectral Index Viewer</h2>
-      
-      <div style={{ marginBottom: "1rem" }}>
+    <div className="app">
+      <h1>Crop NDVI Viewer (React)</h1>
+      <div className="form">
         <input
           type="text"
-          placeholder="Latitude"
-          value={lat}
-          onChange={(e) => setLat(e.target.value)}
-          style={{ marginRight: "0.5rem" }}
+          placeholder="Latitude e.g., 12.9716"
+          value={latitude}
+          onChange={(e) => setLatitude(e.target.value)}
         />
         <input
           type="text"
-          placeholder="Longitude"
-          value={lon}
-          onChange={(e) => setLon(e.target.value)}
-          style={{ marginRight: "0.5rem" }}
+          placeholder="Longitude e.g., 77.5946"
+          value={longitude}
+          onChange={(e) => setLongitude(e.target.value)}
         />
-        <select value={mode} onChange={(e) => setMode(e.target.value)}>
-          <option value="NDVI">NDVI</option>
-          <option value="NDWI">NDWI</option>
-          <option value="SAVI">SAVI</option>
-        </select>
-        <button onClick={fetchIndex} style={{ marginLeft: "1rem" }}>
-          Fetch
-        </button>
+        <button onClick={getNDVI}>Get NDVI</button>
       </div>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
-
-      {data && (
-        <LineChart width={600} height={300} data={data}>
-          <Line type="monotone" dataKey="y" stroke="#8884d8" />
-          <CartesianGrid stroke="#ccc" />
-          <XAxis dataKey="x" />
-          <YAxis />
-          <Tooltip />
-        </LineChart>
-      )}
+      {error && <p className="error">{error}</p>}
+      {image && <img src={image} alt="NDVI" />}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-export const API_BASE = (import.meta.env.VITE_API_BASE as string) || '/api';
+export const API_BASE = import.meta.env.VITE_API_BASE ? import.meta.env.VITE_API_BASE : '/api';
 
 async function handle<T>(res: Response): Promise<T> {
   if (!res.ok) {

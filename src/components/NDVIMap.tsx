@@ -120,59 +120,48 @@ const NDVIMap: React.FC<NDVIMapProps> = ({
     );
   };
 
-  const generateHyperspectralAnalysis = () => {
+  const generateHyperspectralAnalysis = async () => {
+    if (!latitude || !longitude) {
+      setError('Please enter valid coordinates');
+      return;
+    }
+
     setLoading(true);
     setError(null);
-    
-    // MATLAB-style hyperspectral analysis simulation
-    setTimeout(() => {
-      const wavelengths = Array.from({ length: 50 }, (_, i) => 400 + i * 6);
-      const bands = Array.from({ length: 50 }, (_, i) => i + 1);
-      
-      // Simulate reflectance data with realistic vegetation signatures
-      const reflectanceData = wavelengths.map(wl => {
-        if (wl < 500) return Math.random() * 0.1 + 0.05;
-        if (wl < 600) return Math.random() * 0.15 + 0.1;
-        if (wl < 700) return Math.random() * 0.1 + 0.05;
-        return Math.random() * 0.6 + 0.4;
+    setHyperspectralAnalysis(null);
+
+    try {
+      const response = await fetch(`${API_BASE}/hyperspectral`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          latitude: parseFloat(latitude),
+          longitude: parseFloat(longitude),
+          field_id: fieldId
+        }),
       });
 
-      // Calculate vegetation indices
-      const red = reflectanceData[Math.floor((670 - 400) / 6)];
-      const nir = reflectanceData[Math.floor((850 - 400) / 6)] || reflectanceData[reflectanceData.length - 1];
-      const green = reflectanceData[Math.floor((560 - 400) / 6)];
-      const blue = reflectanceData[Math.floor((485 - 400) / 6)];
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
 
-      const ndvi = (nir - red) / (nir + red);
-      const evi = 2.5 * ((nir - red) / (nir + 6 * red - 7.5 * blue + 1));
-      const savi = ((nir - red) / (nir + red + 0.5)) * 1.5;
-      const ndwi = (green - nir) / (green + nir);
-      const gndvi = (nir - green) / (nir + green);
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
 
-      const mockHyperspectral: HyperspectralAnalysis = {
-        bands,
-        wavelengths,
-        reflectance_data: [reflectanceData],
-        vegetation_indices: {
-          ndvi: parseFloat(ndvi.toFixed(3)),
-          evi: parseFloat(evi.toFixed(3)),
-          savi: parseFloat(savi.toFixed(3)),
-          ndwi: parseFloat(ndwi.toFixed(3)),
-          gndvi: parseFloat(gndvi.toFixed(3))
-        },
-        classification: {
-          crop_type: ndvi > 0.6 ? 'Healthy Cereal Crop' : ndvi > 0.3 ? 'Moderate Vegetation' : 'Sparse Vegetation',
-          health_status: ndvi > 0.6 ? 'Excellent' : ndvi > 0.4 ? 'Good' : ndvi > 0.2 ? 'Fair' : 'Poor',
-          stress_indicators: ndvi < 0.3 ? ['Water Stress', 'Nutrient Deficiency'] : ndvi < 0.5 ? ['Mild Stress'] : [],
-          recommendations: ndvi < 0.3 ? ['Increase irrigation', 'Apply fertilizer', 'Monitor for pests'] : 
-                          ndvi < 0.5 ? ['Continue monitoring', 'Optimize irrigation'] : 
-                          ['Maintain current practices', 'Monitor for optimal harvest timing']
-        }
-      };
-
-      setHyperspectralAnalysis(mockHyperspectral);
+      if (data.success) {
+        setHyperspectralAnalysis(data);
+      }
+      
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Hyperspectral analysis failed');
+    } finally {
       setLoading(false);
-    }, 2000);
+    }
   };
 
   const getNDVIAnalysis = async () => {
@@ -272,7 +261,7 @@ const NDVIMap: React.FC<NDVIMapProps> = ({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Map className="w-5 h-5" />
-                Free Satellite Map - Click to Select Location
+                Satellite View
               </CardTitle>
             </CardHeader>
             <CardContent>

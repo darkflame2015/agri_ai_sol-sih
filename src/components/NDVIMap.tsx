@@ -294,7 +294,9 @@ const NDVIMap: React.FC<NDVIMapProps> = ({
       }
 
       if (data.success) {
-        setHyperspectralAnalysis(data);
+        // Handle both MATLAB API response format and fallback format
+        const analysisData = data.analysis || data;
+        setHyperspectralAnalysis(analysisData);
       }
       
     } catch (err) {

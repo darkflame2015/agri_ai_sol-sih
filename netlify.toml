@@ -7,6 +7,15 @@
   NODE_VERSION = "18"
   NPM_CONFIG_OPTIONAL = "true"
   CI = "true"
+  PYTHON_VERSION = "3.8"
+
+# Function configuration
+[functions]
+  directory = "netlify/functions"
+  
+[functions."api"]
+  runtime = "python3.8"
+  included_files = ["requirements.txt"]
 
 # Production environment variables
 [context.production.environment]
@@ -15,6 +24,7 @@
   VITE_ENABLE_ANALYTICS = "true"
   VITE_DEBUG_MODE = "false"
   VITE_ENABLE_REAL_ANALYSIS = "true"
+  VITE_GOOGLE_MAPS_API_KEY = ""
 
 # Deploy preview environment variables  
 [context.deploy-preview.environment]

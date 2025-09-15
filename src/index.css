@@ -1,58 +1,224 @@
-body {
-  background-color: #121212;
-  color: #e0e0e0;
-  font-family: Arial, sans-serif;
-  display: flex;
-  justify-content: center;
-  padding: 30px;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Agricultural AI App Design System - All colors in HSL format */
+
+@layer base {
+  :root {
+    /* Agricultural Theme - Light Mode */
+    --background: 0 0% 100%;
+    --foreground: 151 24% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 151 24% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 151 24% 12%;
+
+    /* Primary: Fresh agricultural green */
+    --primary: 142 76% 36%;
+    --primary-foreground: 0 0% 98%;
+    --primary-glow: 142 76% 55%;
+    --primary-soft: 142 50% 92%;
+
+    /* Secondary: Earth tones */
+    --secondary: 45 25% 94%;
+    --secondary-foreground: 151 24% 12%;
+
+    /* Muted: Soft neutrals */
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 20% 45%;
+
+    /* Accent: Sky blue for data visualization */
+    --accent: 199 89% 48%;
+    --accent-foreground: 0 0% 98%;
+    --accent-soft: 199 89% 95%;
+
+    /* Success: Growth green */
+    --success: 120 60% 45%;
+    --success-foreground: 0 0% 98%;
+    --success-soft: 120 60% 95%;
+
+    /* Warning: Golden yellow */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 15%;
+    --warning-soft: 38 92% 95%;
+
+    /* Destructive: Alert red */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* Borders and inputs */
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 142 76% 36%;
+
+    /* Gradients for agricultural appeal */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-success: linear-gradient(135deg, hsl(var(--success)), hsl(142 60% 55%));
+    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+
+    /* Shadows */
+    --shadow-soft: 0 2px 8px -2px hsl(var(--primary) / 0.1);
+    --shadow-glow: 0 0 20px hsl(var(--primary-glow) / 0.2);
+
+    /* Agricultural-specific colors */
+    --soil: 25 30% 65%;
+    --crop: 120 40% 35%;
+    --water: 199 89% 48%;
+
+    --radius: 0.5rem;
+
+    /* Sidebar theming for agricultural feel */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 151 24% 12%;
+    --sidebar-primary: 142 76% 36%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 142 50% 95%;
+    --sidebar-accent-foreground: 151 24% 12%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 142 76% 36%;
+  }
+
+  .dark {
+    /* Agricultural Theme - Dark Mode */
+    --background: 151 24% 6%;
+    --foreground: 0 0% 95%;
+
+    --card: 151 24% 8%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 151 24% 8%;
+    --popover-foreground: 0 0% 95%;
+
+    /* Primary: Bright agricultural green for dark mode */
+    --primary: 142 76% 55%;
+    --primary-foreground: 151 24% 6%;
+    --primary-glow: 142 76% 65%;
+    --primary-soft: 142 30% 15%;
+
+    /* Secondary: Dark earth tones */
+    --secondary: 151 15% 15%;
+    --secondary-foreground: 0 0% 90%;
+
+    /* Muted: Dark neutrals */
+    --muted: 151 15% 12%;
+    --muted-foreground: 215 20% 65%;
+
+    /* Accent: Bright sky blue */
+    --accent: 199 89% 58%;
+    --accent-foreground: 151 24% 6%;
+    --accent-soft: 199 30% 15%;
+
+    /* Success: Bright growth green */
+    --success: 120 60% 55%;
+    --success-foreground: 151 24% 6%;
+    --success-soft: 120 30% 15%;
+
+    /* Warning: Bright golden yellow */
+    --warning: 38 92% 60%;
+    --warning-foreground: 151 24% 6%;
+    --warning-soft: 38 30% 15%;
+
+    /* Destructive: Bright alert red */
+    --destructive: 0 84% 65%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* Borders and inputs */
+    --border: 151 15% 18%;
+    --input: 151 15% 18%;
+    --ring: 142 76% 55%;
+
+    /* Dark mode gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-success: linear-gradient(135deg, hsl(var(--success)), hsl(120 60% 65%));
+    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+
+    /* Dark shadows */
+    --shadow-soft: 0 2px 8px -2px hsl(0 0% 0% / 0.3);
+    --shadow-glow: 0 0 20px hsl(var(--primary-glow) / 0.1);
+
+    /* Agricultural-specific dark colors */
+    --soil: 25 25% 45%;
+    --crop: 120 35% 45%;
+    --water: 199 89% 58%;
+
+    /* Dark sidebar */
+    --sidebar-background: 151 24% 8%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 142 76% 55%;
+    --sidebar-primary-foreground: 151 24% 6%;
+    --sidebar-accent: 151 15% 12%;
+    --sidebar-accent-foreground: 0 0% 90%;
+    --sidebar-border: 151 15% 18%;
+    --sidebar-ring: 142 76% 55%;
+  }
 }
 
-.app {
-  max-width: 600px;
-  text-align: center;
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /* Agricultural theme animations and effects */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.6s ease-out;
+  }
+
+  .animate-grow {
+    animation: grow 0.4s ease-out;
+  }
+
+  /* Custom scrollbar for agricultural theme */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-muted/30;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary/60 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-primary/80;
+  }
 }
 
-h1 {
-  color: #90caf9;
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin: 20px 0;
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-input {
-  padding: 10px;
-  border-radius: 5px;
-  border: none;
-  background-color: #2c2c2c;
-  color: #e0e0e0;
-}
-
-button {
-  padding: 10px;
-  border-radius: 5px;
-  border: none;
-  background-color: #42a5f5;
-  color: white;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-button:hover {
-  background-color: #1e88e5;
-}
-
-.error {
-  color: #ff5252;
-  margin-top: 10px;
-}
-
-img {
-  margin-top: 20px;
-  max-width: 100%;
-  border-radius: 10px;
-  border: 2px solid #42a5f5;
+@keyframes grow {
+  from { 
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to { 
+    transform: scale(1);
+    opacity: 1;
+  }
 }

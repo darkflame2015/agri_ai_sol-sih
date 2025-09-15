@@ -1,10 +1,12 @@
 import React from 'react';
-import { MapPin, Bell, Activity, Clock, TrendingUp, Eye, Plus } from 'lucide-react';
+import { MapPin, Bell, Activity, Clock, TrendingUp, Eye, Plus, RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useNavigate } from 'react-router-dom';
+import NDVIMap from '@/components/NDVIMap';
+import { useDashboardData } from '@/hooks/useDashboardData';
 
 const KPICard: React.FC<{
   title: string;
@@ -103,6 +105,20 @@ const ProcessingJob: React.FC<{
 
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { stats, alerts, fields, loading, error, refreshData } = useDashboardData();
+
+  const formatTimeAgo = (dateString: string): string => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMs = now.getTime() - date.getTime();
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInHours / 24);
+
+    if (diffInHours < 1) return 'Just now';
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    if (diffInDays < 7) return `${diffInDays}d ago`;
+    return date.toLocaleDateString();
+  };
 
   return (
     <div className="space-y-6">
@@ -114,62 +130,66 @@ export const Dashboard: React.FC = () => {
             Monitor your fields and track agricultural insights
           </p>
         </div>
-        <Button onClick={() => navigate('/fields/new')} className="bg-gradient-primary">
-          <Plus className="w-4 h-4 mr-2" />
-          Add Field
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={refreshData}
+            disabled={loading}
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <Button onClick={() => navigate('/fields/new')} className="bg-gradient-primary">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Field
+          </Button>
+        </div>
       </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <KPICard
           title="Fields Monitored"
-          value="12"
-          change="+2 this month"
+          value={stats?.total_fields?.toString() || "0"}
+          change={stats?.total_fields ? `${stats.total_fields} active` : ""}
           trend="up"
           icon={<MapPin className="w-6 h-6 text-primary" />}
         />
         <KPICard
           title="Active Alerts"
-          value="5"
-          change="-3 since yesterday"
-          trend="down"
+          value={stats?.active_alerts?.toString() || "0"}
+          change={stats?.active_alerts ? `${stats.active_alerts} requiring attention` : ""}
+          trend={stats?.active_alerts && stats.active_alerts > 5 ? "up" : "down"}
           icon={<Bell className="w-6 h-6 text-primary" />}
         />
         <KPICard
-          title="Avg NDVI (7d)"
-          value="0.72"
-          change="+0.05 vs last week"
+          title="Connected Devices"
+          value={stats?.total_devices?.toString() || "0"}
+          change={stats?.total_devices ? `${stats.total_devices} online` : ""}
           trend="up"
           icon={<Activity className="w-6 h-6 text-primary" />}
         />
         <KPICard
-          title="Last Sync"
-          value="2 min ago"
+          title="NDVI Analyses"
+          value={stats?.recent_analyses?.toString() || "0"}
+          change="Last 7 days"
           icon={<Clock className="w-6 h-6 text-primary" />}
         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Map Overview */}
+        {/* NDVI Analysis Map */}
         <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Field Overview</CardTitle>
+            <CardTitle>NDVI Field Analysis</CardTitle>
             <Button variant="outline" size="sm" onClick={() => navigate('/fields')}>
               <Eye className="w-4 h-4 mr-2" />
               View All Fields
             </Button>
           </CardHeader>
           <CardContent>
-            <div className="h-64 bg-muted rounded-lg flex items-center justify-center">
-              <div className="text-center space-y-2">
-                <MapPin className="w-12 h-12 text-muted-foreground mx-auto" />
-                <p className="text-muted-foreground">Interactive field map</p>
-                <p className="text-sm text-muted-foreground">
-                  Showing 12 fields with cluster pins
-                </p>
-              </div>
-            </div>
+            <NDVIMap height="h-96" />
           </CardContent>
         </Card>
 
@@ -182,27 +202,27 @@ export const Dashboard: React.FC = () => {
             </Button>
           </CardHeader>
           <CardContent className="space-y-3">
-            <AlertItem
-              title="Pest Risk Detected"
-              description="High aphid probability in northern section"
-              severity="high"
-              field="Wheat Field A"
-              time="2 hours ago"
-            />
-            <AlertItem
-              title="Nutrient Stress"
-              description="Nitrogen deficiency indicators"
-              severity="medium"
-              field="Corn Field B"
-              time="6 hours ago"
-            />
-            <AlertItem
-              title="Irrigation Alert"
-              description="Soil moisture below threshold"
-              severity="medium"
-              field="Tomato Field C"
-              time="1 day ago"
-            />
+            {loading ? (
+              <div className="text-center py-4">
+                <RefreshCw className="w-6 h-6 animate-spin mx-auto text-muted-foreground" />
+                <p className="text-sm text-muted-foreground mt-2">Loading alerts...</p>
+              </div>
+            ) : alerts.length > 0 ? (
+              alerts.slice(0, 3).map((alert) => (
+                <AlertItem
+                  key={alert.id}
+                  title={alert.title}
+                  description={alert.description}
+                  severity={alert.severity}
+                  field={alert.field_name || `Field ${alert.field_id}`}
+                  time={formatTimeAgo(alert.created_at)}
+                />
+              ))
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-sm text-muted-foreground">No active alerts</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

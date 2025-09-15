@@ -1,6 +1,7 @@
 [build]
   publish = "dist"
   command = "rm -rf node_modules package-lock.json && npm install && npm run build"
+  functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "18"
@@ -13,17 +14,52 @@
   VITE_APP_NAME = "AgriAI Platform"
   VITE_ENABLE_ANALYTICS = "true"
   VITE_DEBUG_MODE = "false"
+  VITE_ENABLE_REAL_ANALYSIS = "true"
 
 # Deploy preview environment variables  
 [context.deploy-preview.environment]
   VITE_API_BASE = ""
   VITE_DEBUG_MODE = "true"
+  VITE_ENABLE_REAL_ANALYSIS = "true"
 
+# Function redirects for API endpoints
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/:splat"
+  to = "/.netlify/functions/api/:splat"
   status = 200
 
+# Specific API endpoint redirects
+[[redirects]]
+  from = "/health"
+  to = "/.netlify/functions/api/health"
+  status = 200
+
+[[redirects]]
+  from = "/ndvi"
+  to = "/.netlify/functions/api/ndvi"
+  status = 200
+
+[[redirects]]
+  from = "/dashboard-stats"
+  to = "/.netlify/functions/api/dashboard-stats"
+  status = 200
+
+[[redirects]]
+  from = "/fields"
+  to = "/.netlify/functions/api/fields"
+  status = 200
+
+[[redirects]]
+  from = "/devices"
+  to = "/.netlify/functions/api/devices"
+  status = 200
+
+[[redirects]]
+  from = "/alerts" 
+  to = "/.netlify/functions/api/alerts"
+  status = 200
+
+# SPA fallback - must be last
 [[redirects]]
   from = "/*"
   to = "/index.html"
